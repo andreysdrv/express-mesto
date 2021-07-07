@@ -8,6 +8,7 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params._id)
+    .orFail()
     .then(user => res.send({ data: user }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }))
 }
