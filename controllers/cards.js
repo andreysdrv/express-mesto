@@ -1,9 +1,10 @@
 const Card = require('../models/card')
+const { ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND } = require('../errors/errors')
 
 const getCards = (req, res) => {
   Card.find({})
     .then(cards => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }))
+    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }))
 }
 
 const deleteCard = (req, res) => {
@@ -11,13 +12,16 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params
 
   Card.findById(cardId)
+    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
     .then((card) => {
-      if(card.owner._id === userId) {
+      if (card.owner._id === userId) {
         Card.findByIdAndRemove(cardId)
           .then(card => res.send(card))
+      } else {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Недостаточно прав' })
       }
     })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }))
+    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }))
 }
 
 const createCard = (req, res) => {
@@ -26,7 +30,13 @@ const createCard = (req, res) => {
 
   Card.create({ name, link, owner })
     .then(card => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' })
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' })
+      }
+    })
 }
 
 const likeCard = (req, res) => {
@@ -35,8 +45,9 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .orFail(() => res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' }))
     .then(likes => res.send({ data: likes }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }))
+    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }))
 }
 
 const dislikeCard = (req, res) => {
@@ -45,8 +56,9 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .orFail(() => res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка' }))
     .then(likes => res.send({ data: likes }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }))
+    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }))
 }
 
 module.exports = {

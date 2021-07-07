@@ -7,6 +7,14 @@ const cardSchema = new Schema({
     maxlength: 30,
     required: true
   },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  likes: [{
+    type: Schema.Types.ObjectId,
+    default: []
+  }],
   link: {
     type: String,
     required: true
@@ -14,14 +22,6 @@ const cardSchema = new Schema({
   owner: {
     type: Object,
     required: true
-  },
-  likes: [{
-    type: Schema.Types.ObjectId,
-    default: []
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 })
 

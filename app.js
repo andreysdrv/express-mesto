@@ -30,5 +30,5 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 })
 
 app.listen(PORT, () => {
-  console.log('FFFFFFF')
+  console.log(`Сервер успешно запущен. Порт: ${PORT}`)
 })
