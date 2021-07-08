@@ -45,9 +45,15 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' }))
+    .orFail()
     .then((likes) => res.send({ data: likes }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' });
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 const dislikeCard = (req, res) => {
@@ -56,9 +62,15 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка' }))
+    .orFail()
     .then((likes) => res.send({ data: likes }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка' });
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports = {
