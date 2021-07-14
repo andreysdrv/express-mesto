@@ -10,6 +10,8 @@ const userRouter = require('./routes/users');
 
 const cardsRouter = require('./routes/cards');
 
+const { login, createUser } = require('./controllers/users');
+
 const { PORT = 3000 } = process.env;
 
 const { ERR_NOT_FOUND } = require('./errors/errors');
@@ -28,6 +30,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use(userRouter);
 app.use(cardsRouter);
