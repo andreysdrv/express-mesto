@@ -1,6 +1,10 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND } = require('../errors/errors');
+const {
+  ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND, ERR_AUTH,
+} = require('../errors/errors');
+const Auth = require('../errors/Auth');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -74,10 +78,50 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        'secret-key',
+        { expiresIn: '7d' },
+      );
+
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+        .send({ message: 'sdfasdfasfsafsa' });
+    })
+    .catch(() => res.status(ERR_AUTH).send({ message: 'Ошибка авторизации' }));
+
+  // User.findOne({ email })
+  //   .then((user) => {
+  //     if (!user) {
+  //     // не найден
+  //       throw new Auth('Неправильные почта или пароль');
+  //     }
+  //     // найден
+  //     return bcrypt.compare(password, user.password);
+  //   })
+  //   .then((matched) => {
+  //     if (!matched) {
+  //       // не совпали
+  //       throw new Auth('Неправильные почта или пароль');
+  //     }
+  //     // совпали
+  //     res.send({ message: 'Все верно!' });
+  //   })
+  //   .catch(() => res.send({ message: 'Произошла ошибка' }));
+};
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUser,
   updateAvatar,
+  login,
 };
