@@ -41,6 +41,4 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-app.listen(PORT, () => {
-  console.log(`Сервер успешно запущен. Порт: ${PORT}`);
-});
+app.listen(PORT);

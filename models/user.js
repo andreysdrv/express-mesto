@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const { isEmail } = require('validator');
 
 const userSchema = new Schema({
   name: {
@@ -16,6 +17,21 @@ const userSchema = new Schema({
   avatar: {
     type: String,
     required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator(email) {
+        return isEmail(email);
+      },
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    unique: true,
   },
 });
 
