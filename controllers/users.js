@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND, ERR_AUTH,
+  ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND,
 } = require('../errors/errors');
 const Auth = require('../errors/Auth');
 
@@ -95,7 +95,9 @@ const login = (req, res) => {
       })
         .send({ message: 'sdfasdfasfsafsa' });
     })
-    .catch(() => res.status(ERR_AUTH).send({ message: 'Ошибка авторизации' }));
+    .catch(() => {
+      throw new Auth('Ошибка авторизации');
+    });
 
   // User.findOne({ email })
   //   .then((user) => {

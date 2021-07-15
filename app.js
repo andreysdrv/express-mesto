@@ -10,11 +10,13 @@ const userRouter = require('./routes/users');
 
 const cardsRouter = require('./routes/cards');
 
+const auth = require('./middlewares/auth');
+
 const { login, createUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
-const { ERR_NOT_FOUND } = require('./errors/errors');
+const NotFound = require('./errors/NotFound');
 
 const app = express();
 
@@ -34,10 +36,10 @@ app.use((req, res, next) => {
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use(userRouter);
-app.use(cardsRouter);
-app.use('*', (req, res) => {
-  res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый ресурс не найден' });
+app.use('/', auth, userRouter);
+app.use('/', auth, cardsRouter);
+app.use('*', () => {
+  throw new NotFound('Запрашиваемый ресурс не найден');
 });
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
