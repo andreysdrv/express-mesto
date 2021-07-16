@@ -1,12 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND,
-} = require('../errors/errors');
+const { ERR_DEFAULT } = require('../errors/errors');
 const Auth = require('../errors/Auth');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
+const Conflict = require('../errors/Conflict');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -39,17 +38,24 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
+    }))
+    .catch((err) => {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        // Обработка ошибки
+        throw new Conflict('Пользователь с таким email уже существует');
+      }
     })
-      .then((user) => res.send({ data: user }))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          throw new BadRequest('Ошибка валидации');
-        } else if (err.name === 'CastError') {
-          throw new BadRequest('Переданы некорректные данные при создании пользователя');
-        } else {
-          res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-        }
-      }))
+    .then((user) => res.send({ data: user }))
+    .catch(next)
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequest('Ошибка валидации');
+      } else if (err.name === 'CastError') {
+        throw new BadRequest('Переданы некорректные данные при создании пользователя');
+      } else {
+        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+      }
+    })
     .catch(next);
 };
 
