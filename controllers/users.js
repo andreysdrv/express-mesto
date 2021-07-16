@@ -6,6 +6,8 @@ const {
 } = require('../errors/errors');
 const Auth = require('../errors/Auth');
 
+
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -29,6 +31,8 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
+  console.log(name, about, avatar, email, password);
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
@@ -66,6 +70,8 @@ const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   const userId = req.user._id;
 
+  console.log(`айди из запроса ${userId}`);
+
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Пользователь с таким id не найден' }))
     .then((avatarData) => res.send({ data: avatarData }))
@@ -93,30 +99,17 @@ const login = (req, res) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .send({ message: 'sdfasdfasfsafsa' });
+        .send({ message: 'Авторизация прошла успешно!' });
     })
     .catch(() => {
       throw new Auth('Ошибка авторизации');
     });
+};
 
-  // User.findOne({ email })
-  //   .then((user) => {
-  //     if (!user) {
-  //     // не найден
-  //       throw new Auth('Неправильные почта или пароль');
-  //     }
-  //     // найден
-  //     return bcrypt.compare(password, user.password);
-  //   })
-  //   .then((matched) => {
-  //     if (!matched) {
-  //       // не совпали
-  //       throw new Auth('Неправильные почта или пароль');
-  //     }
-  //     // совпали
-  //     res.send({ message: 'Все верно!' });
-  //   })
-  //   .catch(() => res.send({ message: 'Произошла ошибка' }));
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((currentUser) => res.send({ currentUser }))
+    .catch((err) => res.send(err));
 };
 
 module.exports = {
@@ -126,4 +119,5 @@ module.exports = {
   updateUser,
   updateAvatar,
   login,
+  getCurrentUser,
 };

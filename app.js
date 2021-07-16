@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
 
+const cookieParser = require('cookie-parser');
+
 const helmet = require('helmet');
 
 const userRouter = require('./routes/users');
@@ -25,13 +27,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(helmet());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '60e57bbcd41cc522a06f1af4',
-  };
+app.use(cookieParser());
 
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '60e57bbcd41cc522a06f1af4',
+//   };
+
+//   next();
+// });
 
 app.post('/signin', login);
 app.post('/signup', createUser);
