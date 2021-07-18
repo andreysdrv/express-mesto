@@ -2,6 +2,7 @@ const Card = require('../models/card');
 const { ERR_DEFAULT } = require('../errors/errors');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
+const Forbidden = require('../errors/Forbidden');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -11,19 +12,19 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res, next) => {
   const userId = req.user._id;
-  const { cardId } = req.params;
+  const { _id } = req.params;
 
-  Card.findById(cardId)
+  Card.findById(_id)
     .orFail()
     .catch(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
     .then((card) => {
       if (card.owner.toString() === userId) {
-        Card.findByIdAndRemove(cardId)
+        Card.findByIdAndRemove(_id)
           .then((cardData) => res.send(cardData));
       } else {
-        throw new BadRequest('Недостаточно прав!');
+        throw new Forbidden('Недостаточно прав!');
       }
     })
     .catch(next)

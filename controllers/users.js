@@ -7,27 +7,27 @@ const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Conflict = require('../errors/Conflict');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }));
+    // .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
   User.findById(req.params._id)
-    .orFail()
-    .catch(() => {
+    .orFail(() => {
       throw new NotFound('Пользователь с таким id не найден');
     })
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
-    .catch(next);
+    .catch(next)
+    // .catch((err) => {
+    //   if (err.name === 'CastError') {
+    //     throw new BadRequest('Переданы некорректные данные');
+    //   } else {
+    //     res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+    //   }
+    // })
 };
 
 const createUser = (req, res, next) => {
@@ -45,7 +45,7 @@ const createUser = (req, res, next) => {
         throw new Conflict('Пользователь с таким email уже существует');
       }
     })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send({ data: { name: user.name, about: user.about, avatar: user.avatar, email: user.email } }))
     .catch(next)
     .catch((err) => {
       if (err.name === 'ValidationError') {

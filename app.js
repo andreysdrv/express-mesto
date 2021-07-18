@@ -22,14 +22,6 @@ app.use(helmet());
 
 app.use(cookieParser());
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '60e57bbcd41cc522a06f1af4',
-//   };
-
-//   next();
-// });
-
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 
@@ -40,6 +32,19 @@ app.use('*', () => {
 });
 
 app.use(errors());
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
 
 mongoose.connect('mongodb://localhost:27017/mestodbnew', {
   useNewUrlParser: true,
