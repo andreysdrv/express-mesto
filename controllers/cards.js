@@ -45,7 +45,7 @@ const createCard = (req, res, next) => {
 
 const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
@@ -58,7 +58,7 @@ const likeCard = (req, res, next) => {
 
 const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )

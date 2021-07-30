@@ -31,6 +31,13 @@ app.use('*', () => {
   throw new NotFound('Запрашиваемый ресурс не найден');
 });
 
+mongoose.connect('mongodb://localhost:27017/mestodbnew', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true,
+});
+
 app.use(errors());
 
 app.use((err, req, res, next) => {
@@ -44,13 +51,6 @@ app.use((err, req, res, next) => {
         : message,
     });
   next();
-});
-
-mongoose.connect('mongodb://localhost:27017/mestodbnew', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true,
 });
 
 app.listen(PORT);

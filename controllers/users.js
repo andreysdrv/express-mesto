@@ -22,21 +22,6 @@ const getUserById = (req, res, next) => {
     })
     .catch(next);
 };
-// const getUserById = (req, res, next) => {
-//   User.findById(req.params._id)
-//     .orFail(() => {
-//       throw new NotFound('Пользователь с таким id не найден');
-//     })
-//     .then((user) => res.send({ data: user }))
-//     .catch((err) => {
-//       if (err.name === 'CastError') {
-//         throw new BadRequest('Переданы некорректные данные');
-//       } else {
-//         res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-//       }
-//     })
-//     .catch(next);
-// };
 
 const createUser = (req, res, next) => {
   const {
