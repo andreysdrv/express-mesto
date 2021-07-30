@@ -1,13 +1,12 @@
 const Card = require('../models/card');
-const { ERR_DEFAULT } = require('../errors/errors');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Forbidden = require('../errors/Forbidden');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
@@ -27,14 +26,6 @@ const deleteCard = (req, res, next) => {
         throw new Forbidden('Недостаточно прав!');
       }
     })
-    .catch(next)
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные при удалении карточки');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 
@@ -46,11 +37,7 @@ const createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Ошибка валидации');
-      } else if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные при создании карточки');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+        throw new BadRequest(err.message);
       }
     })
     .catch(next);
@@ -62,18 +49,10 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail()
-    .catch(() => {
+    .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
     .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные для постановки лайка');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 
@@ -83,18 +62,10 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail()
-    .catch(() => {
+    .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
     .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные для снятия лайка');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 
