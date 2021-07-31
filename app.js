@@ -7,6 +7,7 @@ const { errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { login, createUser } = require('./controllers/users');
 const NotFound = require('./errors/NotFound');
 const { loginValidation, userValidation } = require('./middlewares/validate');
@@ -21,6 +22,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 app.use(cookieParser());
+
+app.use(requestLogger); // подключаем логгер запросов
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
@@ -37,6 +40,8 @@ mongoose.connect('mongodb://localhost:27017/mestodbnew', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors());
 
